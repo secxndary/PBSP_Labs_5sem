@@ -2,6 +2,7 @@
 #include "Winsock2.h"
 #pragma comment (lib, "WS2_32.lib")
 using namespace std;
+ 
 
 
 
@@ -71,24 +72,46 @@ int main()
 
 	// ======================  TASK 4  =======================
 
-	SOCKET  sS;           // дескриптор сокета 
-	WSADATA wsaData;
+	//SOCKET  sS;           // дескриптор сокета 
+	//WSADATA wsaData;
+	//try
+	//{
+	//	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+	//		throw  SetErrorMsgText("Startup:", WSAGetLastError());
+	//	if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+	//		throw  SetErrorMsgText("socket:", WSAGetLastError());
+	//	//...........................................................
+	//	if (closesocket(sS) == SOCKET_ERROR)
+	//		throw  SetErrorMsgText("closesocket:", WSAGetLastError());
+	//	if (WSACleanup() == SOCKET_ERROR)
+	//		throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
+	//}
+	//catch (string errorMsgText)
+	//{
+	//	cout << endl << errorMsgText;
+	//}
+
+
+
+
+	// ======================  TASK 5  =======================
+
 	try
 	{
-		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-			throw  SetErrorMsgText("Startup:", WSAGetLastError());
-		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+		SOCKET  sS;                           // серверный сокет
+		if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
 			throw  SetErrorMsgText("socket:", WSAGetLastError());
-		//...........................................................
-		if (closesocket(sS) == SOCKET_ERROR)
-			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
-		if (WSACleanup() == SOCKET_ERROR)
-			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
+
+		SOCKADDR_IN serv;                     // параметры  сокета sS
+		serv.sin_family = AF_INET;           // используется IP-адресация  
+		serv.sin_port = htons(2000);          // порт 2000
+		serv.sin_addr.s_addr = INADDR_ANY;   // любой собственный IP-адрес 
+
+		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
+			throw  SetErrorMsgText("bind:", WSAGetLastError());
 	}
 	catch (string errorMsgText)
 	{
 		cout << endl << errorMsgText;
 	}
-
-
 }
