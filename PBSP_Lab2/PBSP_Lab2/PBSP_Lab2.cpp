@@ -33,17 +33,34 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
-	SOCKET sS = socket(AF_INET, SOCK_STREAM, NULL);
+	//SOCKET sS = socket(AF_INET, SOCK_STREAM, NULL);
+	//try
+	//{
+	//	//............................................................
+	//	if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+	//		throw  SetErrorMsgText("socket:", WSAGetLastError());
+	//	//.............................................................
+	//}
+	//catch (string errorMsgText)
+	//{
+	//	cout << endl << "WSAGetLastError: " << errorMsgText;
+	//}
+
+
+
+
+	WSADATA wsaData;
 	try
 	{
-		//............................................................
-		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-			throw  SetErrorMsgText("socket:", WSAGetLastError());
-		//.............................................................
+		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+			throw  SetErrorMsgText("Startup:", WSAGetLastError());
+		//...........................................................
+		if (WSACleanup() == SOCKET_ERROR)
+			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
 	}
 	catch (string errorMsgText)
 	{
-		cout << endl << "WSAGetLastError: " << errorMsgText;
+		cout << endl << errorMsgText;
 	}
 
 
