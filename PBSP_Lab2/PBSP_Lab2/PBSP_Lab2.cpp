@@ -33,6 +33,8 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
+	// ======================  TASK 2  =======================
+
 	//SOCKET sS = socket(AF_INET, SOCK_STREAM, NULL);
 	//try
 	//{
@@ -48,13 +50,38 @@ int main()
 
 
 
+	// ======================  TASK 3  =======================
+	
+	//WSADATA wsaData;
+	//try
+	//{
+	//	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+	//		throw  SetErrorMsgText("Startup:", WSAGetLastError());
+	//	//...........................................................
+	//	if (WSACleanup() == SOCKET_ERROR)
+	//		throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
+	//}
+	//catch (string errorMsgText)
+	//{
+	//	cout << endl << errorMsgText;
+	//}
 
+
+
+
+	// ======================  TASK 4  =======================
+
+	SOCKET  sS;           // дескриптор сокета 
 	WSADATA wsaData;
 	try
 	{
 		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
+		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+			throw  SetErrorMsgText("socket:", WSAGetLastError());
 		//...........................................................
+		if (closesocket(sS) == SOCKET_ERROR)
+			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
 		if (WSACleanup() == SOCKET_ERROR)
 			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
 	}
