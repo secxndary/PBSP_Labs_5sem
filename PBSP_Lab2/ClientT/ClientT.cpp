@@ -1,11 +1,12 @@
 ﻿#include <iostream>
 #include "Winsock2.h"
 #pragma comment (lib, "WS2_32.lib")
+#pragma warning(disable:4996)
 using namespace std;
 
 
 
-string  GetErrorMsgText(int code)    // cформировать текст ошибки 
+string GetErrorMsgText(int code)    // cформировать текст ошибки 
 {
 	string msgText;
 	switch (code)                      // проверка кода возврата  
@@ -32,7 +33,7 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
-	SOCKET  sS;           // дескриптор сокета 
+	SOCKET  cC;           // дескриптор сокета 
 	WSADATA wsaData;
 
 	try
@@ -40,9 +41,18 @@ int main()
 
 		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
-		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+		if ((cC = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
 			throw  SetErrorMsgText("socket:", WSAGetLastError());
-		if (closesocket(sS) == SOCKET_ERROR)
+
+		SOCKADDR_IN serv;                    // параметры  сокета сервера
+		serv.sin_family = AF_INET;           // используется IP-адресация  
+		serv.sin_port = htons(2000);                   // TCP-порт 2000
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1");  // адрес сервера
+		if ((connect(cC, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
+			throw  SetErrorMsgText("connect:", WSAGetLastError());
+
+
+		if (closesocket(cC) == SOCKET_ERROR)
 			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
 		if (WSACleanup() == SOCKET_ERROR)
 			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
