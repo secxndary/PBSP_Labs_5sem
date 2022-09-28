@@ -67,8 +67,8 @@ int main()
 
 		// тут зависает и это норма (6 таска, accept)
 
-		//if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)	
-		//	throw  SetErrorMsgText("accept:", WSAGetLastError());
+		if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)	
+			throw  SetErrorMsgText("accept:", WSAGetLastError());
 	
 
 
