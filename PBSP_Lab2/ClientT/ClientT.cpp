@@ -1,7 +1,10 @@
 ﻿#include <iostream>
 #include <string>
 #include <stdio.h>
+#include <clocale>
+#include <ctime>
 #include "Winsock2.h"
+#include "WS2tcpip.h"
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
 using namespace std;
@@ -48,50 +51,108 @@ int main()
 		SOCKADDR_IN serv;                    // параметры  сокета сервера
 		serv.sin_family = AF_INET;           // используется IP-адресация  
 		serv.sin_port = htons(2000);                   // TCP-порт 2000
+		//		192.168.56.104
+		//		127.0.0.1
 		serv.sin_addr.s_addr = inet_addr("192.168.56.104");  // адрес сервера
 		if ((connect(cC, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw  SetErrorMsgText("connect:", WSAGetLastError());
 
 
-	
 
 
-		char obufText[19] = "Hello from client ";  
-		int lobufText = 19; 
 
-		string strText(obufText);
-		for (int i = 0; i < 10; i++)
+
+
+
+		// ======================  TASK 11  =======================
+
+		//char obuf[19] = "Hello from client\n";  
+		//int lobuf = 19;                    //количество отправленных байь	//18 длина
+
+		//for (int i = 1; i <= 1000; i++)
+		//{
+		//	cout << obuf;
+		//	if ((lobuf = send(cC, obuf, strlen(obuf), NULL)) == SOCKET_ERROR)
+		//		throw  SetErrorMsgText("send:", WSAGetLastError());
+		//}
+
+
+
+
+
+
+
+
+
+
+		// ======================  TASK 13  =======================
+
+		//char obufText[19] = "Hello from client ";
+		//int lobufText = 19;
+
+		//string strText(obufText);
+		//for (int i = 0; i < 10; i++)
+		//{
+		//	char buf10[21];
+		//	string num = to_string(i);
+		//	string strWithNum = strText + num + "\n";
+		//	strcpy(buf10, strWithNum.c_str());
+		//	cout << buf10;
+		//	if ((lobufText = send(cC, buf10, strlen(buf10), NULL)) == SOCKET_ERROR)
+		//		throw  SetErrorMsgText("send:", WSAGetLastError());
+		//}
+
+		//for (int i = 10; i < 100; i++)
+		//{
+		//	char buf100[22];
+		//	string num = to_string(i);
+		//	string strWithNum = strText + num + "\n";
+		//	strcpy(buf100, strWithNum.c_str());
+		//	cout << buf100;
+		//	if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
+		//		throw  SetErrorMsgText("send:", WSAGetLastError());
+		//}
+
+		//for (int i = 100; i < 1000; i++)
+		//{
+		//	char buf100[23];
+		//	string num = to_string(i);
+		//	string strWithNum = strText + num + "\n";
+		//	strcpy(buf100, strWithNum.c_str());
+		//	cout << buf100;
+		//	if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
+		//		throw  SetErrorMsgText("send:", WSAGetLastError());
+		//}
+
+
+
+
+
+
+
+
+
+
+
+		// ======================  TASK 15  =======================
+
+
+		char ibuf[24], 
+			 obuf[24] = "Hello from Client"; 
+		int count;
+		cout << "Enter number of messages:\n";
+		cin >> count;
+
+		for (int i = 0; i < count; i++)
 		{
-			char buf10[21];
-			string num = to_string(i);
-			string strWithNum = strText + num + "\n";
-			strcpy(buf10, strWithNum.c_str());
-			cout << buf10;
-			if ((lobufText = send(cC, buf10, strlen(buf10), NULL)) == SOCKET_ERROR)
-				throw  SetErrorMsgText("send:", WSAGetLastError());
+
+			if (SOCKET_ERROR == send(cC, obuf, sizeof(obuf), NULL))
+				cout << "send:" << GetLastError() << endl;;
+			if (SOCKET_ERROR == recv(cC, ibuf, sizeof(ibuf), NULL))
+				cout << "recv:" << GetLastError() << endl;
+			cout << ibuf << " " << (i + 1) << endl;
 		}
 
-		for (int i = 10; i < 100; i++)
-		{
-			char buf100[22];
-			string num = to_string(i);
-			string strWithNum = strText + num + "\n";
-			strcpy(buf100, strWithNum.c_str());
-			cout << buf100;
-			if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
-				throw  SetErrorMsgText("send:", WSAGetLastError());
-		}
-
-		for (int i = 100; i < 1000; i++)
-		{
-			char buf100[23];
-			string num = to_string(i);
-			string strWithNum = strText + num + "\n";
-			strcpy(buf100, strWithNum.c_str());
-			cout << buf100;
-			if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
-				throw  SetErrorMsgText("send:", WSAGetLastError());
-		}
 
 
 
@@ -105,8 +166,10 @@ int main()
 		if (closesocket(cC) == SOCKET_ERROR)
 			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
 		if (WSACleanup() == SOCKET_ERROR)
-			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
+			throw SetErrorMsgText("Cleanup: ", WSAGetLastError());
 	}
+
+	
 	catch (string errorMsgText)
 	{
 		cout << endl << "WSAGetLastError: " << errorMsgText;
