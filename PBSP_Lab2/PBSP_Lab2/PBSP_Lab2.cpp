@@ -209,6 +209,7 @@ int main()
 			cout << "Client IP:    " << inet_ntoa(c_adr.sin_addr) << endl;
 			cout << "Client port:  " << htons(c_adr.sin_port) << "\n\n";
 
+			int time = clock();
 			while (true)
 			{
 				if (SOCKET_ERROR == recv(c, ibuf, sizeof(ibuf), NULL))
@@ -224,6 +225,7 @@ int main()
 			}
 			i = 0;
 			cout << "Client Disconected.\n";
+			cout << "Program was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n\n";
 		}
 		if (closesocket(c) == SOCKET_ERROR)
 			throw SetErrorMsgText("closesocket:", WSAGetLastError());

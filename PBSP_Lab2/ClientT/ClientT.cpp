@@ -143,6 +143,7 @@ int main()
 		cout << "Enter number of messages:\n";
 		cin >> count;
 
+		int time = clock();
 		for (int i = 0; i < count; i++)
 		{
 
@@ -152,6 +153,7 @@ int main()
 				cout << "recv:" << GetLastError() << endl;
 			cout << ibuf << " " << (i + 1) << endl;
 		}
+		cout << "\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n";
 
 
 
