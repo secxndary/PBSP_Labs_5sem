@@ -1,4 +1,6 @@
 ﻿#include <iostream>
+#include <string>
+#include <stdio.h>
 #include "Winsock2.h"
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
@@ -33,12 +35,14 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
+	//setlocale(LC_ALL, "Russian");
+
 	SOCKET  cC;           // дескриптор сокета 
 	WSADATA wsaData;
 
 	try
 	{
-		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
 		if ((cC = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
 			throw  SetErrorMsgText("socket:", WSAGetLastError());
@@ -46,19 +50,21 @@ int main()
 		SOCKADDR_IN serv;                    // параметры  сокета сервера
 		serv.sin_family = AF_INET;           // используется IP-адресация  
 		serv.sin_port = htons(2000);                   // TCP-порт 2000
-		serv.sin_addr.s_addr = inet_addr("127.0.0.1");  // адрес сервера
+		serv.sin_addr.s_addr = inet_addr("192.168.56.104");  // адрес сервера
 		if ((connect(cC, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw  SetErrorMsgText("connect:", WSAGetLastError());
 
 
-		char ibuf[50],                     //буфер ввода 
-			obuf[50] = "Hello from client";  //буфер вывода
-		int  libuf = 100,                    //количество принятых байт
-			lobuf = 100;                    //количество отправленных байь 
+		char ibuf[19],                     //буфер ввода 
+			obuf[19] = "Hello from client\n";  //буфер вывода
+		int lobuf = 19;                    //количество отправленных байь	//18 длина
 
-		if ((lobuf = send(cC, obuf, strlen(obuf) + 1, NULL)) == SOCKET_ERROR)
-			throw  SetErrorMsgText("send:", WSAGetLastError());
-
+		for (int i = 1; i <= 1000; i++)
+		{
+			cout << obuf;
+			if ((lobuf = send(cC, obuf, strlen(obuf), NULL)) == SOCKET_ERROR)
+				throw  SetErrorMsgText("send:", WSAGetLastError());
+		}
 
 
 
