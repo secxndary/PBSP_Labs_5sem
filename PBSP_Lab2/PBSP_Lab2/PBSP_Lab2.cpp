@@ -34,74 +34,19 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
-	// ======================  TASK 2  =======================
-
-	//SOCKET sS = socket(AF_INET, SOCK_STREAM, NULL);
-	//try
-	//{
-	//	//............................................................
-	//	if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-	//		throw  SetErrorMsgText("socket:", WSAGetLastError());
-	//	//.............................................................
-	//}
-	//catch (string errorMsgText)
-	//{
-	//	cout << endl << "WSAGetLastError: " << errorMsgText;
-	//}
 
 
-
-	// ======================  TASK 3  =======================
-	
-	//WSADATA wsaData;
-	//try
-	//{
-	//	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-	//		throw  SetErrorMsgText("Startup:", WSAGetLastError());
-	//	//...........................................................
-	//	if (WSACleanup() == SOCKET_ERROR)
-	//		throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
-	//}
-	//catch (string errorMsgText)
-	//{
-	//	cout << endl << errorMsgText;
-	//}
-
-
-
-
-	// ======================  TASK 4  =======================
-
-	//SOCKET  sS;           // дескриптор сокета 
-	//WSADATA wsaData;
-	//try
-	//{
-	//	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-	//		throw  SetErrorMsgText("Startup:", WSAGetLastError());
-	//	if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-	//		throw  SetErrorMsgText("socket:", WSAGetLastError());
-	//	//...........................................................
-	//	if (closesocket(sS) == SOCKET_ERROR)
-	//		throw  SetErrorMsgText("closesocket:", WSAGetLastError());
-	//	if (WSACleanup() == SOCKET_ERROR)
-	//		throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
-	//}
-	//catch (string errorMsgText)
-	//{
-	//	cout << endl << errorMsgText;
-	//}
-
-
-
-
-	// ======================  TASK 5  =======================
+	SOCKET  sS;           // дескриптор сокета 
+	WSADATA wsaData;
 
 	try
 	{
-		SOCKET  sS;                           // серверный сокет
-		if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-			throw  SetErrorMsgText("socket:", WSAGetLastError());
 
+		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+			throw  SetErrorMsgText("Startup:", WSAGetLastError());
+		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+			throw  SetErrorMsgText("socket:", WSAGetLastError());
+		//...........................................................
 		SOCKADDR_IN serv;                     // параметры  сокета sS
 		serv.sin_family = AF_INET;           // используется IP-адресация  
 		serv.sin_port = htons(2000);          // порт 2000
@@ -109,9 +54,60 @@ int main()
 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
+		if (listen(sS, SOMAXCONN) == SOCKET_ERROR)
+			throw  SetErrorMsgText("listen:", WSAGetLastError());
+
+
+
+		SOCKET cS;	                 // сокет для обмена данными с клиентом 
+		SOCKADDR_IN clnt;             // параметры  сокета клиента
+		memset(&clnt, 0, sizeof(clnt)); // обнулить память
+		int lclnt = sizeof(clnt);    // размер SOCKADDR_IN
+
+
+		// тут зависает и это норма (6 таска, accept)
+
+		//if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)	
+		//	throw  SetErrorMsgText("accept:", WSAGetLastError());
+	
+
+
+		if (closesocket(sS) == SOCKET_ERROR)
+			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
+		if (WSACleanup() == SOCKET_ERROR)
+			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
 	}
 	catch (string errorMsgText)
 	{
-		cout << endl << errorMsgText;
+		cout << endl << "WSAGetLastError: " << errorMsgText;
 	}
+
+
+
+
+
+	// ======================  TASK 6  =======================
+
+	//try
+	//{
+	//	//...WSAStartup(...),sS = socket(...,SOCKET_STREAM,...),bind(sS,...)  
+
+	//	if (listen(sS, SOMAXCONN) == SOCKET_ERROR)
+	//		throw  SetErrorMsgText("listen:", WSAGetLastError());
+
+	//	SOCKET cS;	                 // сокет для обмена данными с клиентом 
+	//	SOCKADDR_IN clnt;             // параметры  сокета клиента
+	//	memset(&clnt, 0, sizeof(clnt)); // обнулить память
+	//	int lclnt = sizeof(clnt);    // размер SOCKADDR_IN
+
+	//	if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)
+	//		throw  SetErrorMsgText("accept:", WSAGetLastError());
+	//	//.................................................................
+	//}
+	//catch (string errorMsgText)
+	//{
+	//	cout << endl << errorMsgText;
+	//}
+	//........................................................................
+
 }
