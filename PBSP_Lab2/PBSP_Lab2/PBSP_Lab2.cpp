@@ -76,6 +76,16 @@ int main()
 		cout << "Client port:   " << clnt.sin_port << endl;
 
 
+		char ibuf[50],                     //буфер ввода 
+			 obuf[50] = "server: recieved ";  //буфер вывода
+		int  libuf = 100,                    //количество принятых байт
+			lobuf = 100;                    //количество отправленных байь 
+		if ((libuf = recv(cS, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
+			throw  SetErrorMsgText("recv:", WSAGetLastError());
+		_itoa(lobuf, obuf + sizeof("server: recieved ") - 1, 10);
+		cout << ibuf;
+
+
 		if (closesocket(sS) == SOCKET_ERROR)
 			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
 		if (WSACleanup() == SOCKET_ERROR)

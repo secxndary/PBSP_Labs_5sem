@@ -38,7 +38,6 @@ int main()
 
 	try
 	{
-
 		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
 		if ((cC = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
@@ -50,6 +49,17 @@ int main()
 		serv.sin_addr.s_addr = inet_addr("127.0.0.1");  // адрес сервера
 		if ((connect(cC, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw  SetErrorMsgText("connect:", WSAGetLastError());
+
+
+		char ibuf[50],                     //буфер ввода 
+			obuf[50] = "Hello from client";  //буфер вывода
+		int  libuf = 100,                    //количество принятых байт
+			lobuf = 100;                    //количество отправленных байь 
+
+		if ((lobuf = send(cC, obuf, strlen(obuf) + 1, NULL)) == SOCKET_ERROR)
+			throw  SetErrorMsgText("send:", WSAGetLastError());
+
+
 
 
 		if (closesocket(cC) == SOCKET_ERROR)
