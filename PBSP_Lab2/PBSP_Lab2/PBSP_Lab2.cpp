@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include "Winsock2.h"
 #pragma comment (lib, "WS2_32.lib")
+#pragma warning(disable:4996)
 using namespace std;
  
 
@@ -69,7 +70,10 @@ int main()
 
 		if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)	
 			throw  SetErrorMsgText("accept:", WSAGetLastError());
-	
+
+		char* ip = inet_ntoa(clnt.sin_addr);	// ф-ия для получения айпи адреса клиента
+		cout << "Client IP:     " << ip << endl;
+		cout << "Client port:   " << clnt.sin_port << endl;
 
 
 		if (closesocket(sS) == SOCKET_ERROR)
@@ -81,33 +85,4 @@ int main()
 	{
 		cout << endl << "WSAGetLastError: " << errorMsgText;
 	}
-
-
-
-
-
-	// ======================  TASK 6  =======================
-
-	//try
-	//{
-	//	//...WSAStartup(...),sS = socket(...,SOCKET_STREAM,...),bind(sS,...)  
-
-	//	if (listen(sS, SOMAXCONN) == SOCKET_ERROR)
-	//		throw  SetErrorMsgText("listen:", WSAGetLastError());
-
-	//	SOCKET cS;	                 // сокет для обмена данными с клиентом 
-	//	SOCKADDR_IN clnt;             // параметры  сокета клиента
-	//	memset(&clnt, 0, sizeof(clnt)); // обнулить память
-	//	int lclnt = sizeof(clnt);    // размер SOCKADDR_IN
-
-	//	if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)
-	//		throw  SetErrorMsgText("accept:", WSAGetLastError());
-	//	//.................................................................
-	//}
-	//catch (string errorMsgText)
-	//{
-	//	cout << endl << errorMsgText;
-	//}
-	//........................................................................
-
 }
