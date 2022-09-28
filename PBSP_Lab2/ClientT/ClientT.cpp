@@ -35,8 +35,6 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
-	//setlocale(LC_ALL, "Russian");
-
 	SOCKET  cC;           // дескриптор сокета 
 	WSADATA wsaData;
 
@@ -55,16 +53,52 @@ int main()
 			throw  SetErrorMsgText("connect:", WSAGetLastError());
 
 
-		char ibuf[19],                     //буфер ввода 
-			obuf[19] = "Hello from client\n";  //буфер вывода
-		int lobuf = 19;                    //количество отправленных байь	//18 длина
+	
 
-		for (int i = 1; i <= 1000; i++)
+
+		char obufText[19] = "Hello from client ";  
+		int lobufText = 19; 
+
+		string strText(obufText);
+		for (int i = 0; i < 10; i++)
 		{
-			cout << obuf;
-			if ((lobuf = send(cC, obuf, strlen(obuf), NULL)) == SOCKET_ERROR)
+			char buf10[21];
+			string num = to_string(i);
+			string strWithNum = strText + num + "\n";
+			strcpy(buf10, strWithNum.c_str());
+			cout << buf10;
+			if ((lobufText = send(cC, buf10, strlen(buf10), NULL)) == SOCKET_ERROR)
 				throw  SetErrorMsgText("send:", WSAGetLastError());
 		}
+
+		for (int i = 10; i < 100; i++)
+		{
+			char buf100[22];
+			string num = to_string(i);
+			string strWithNum = strText + num + "\n";
+			strcpy(buf100, strWithNum.c_str());
+			cout << buf100;
+			if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
+				throw  SetErrorMsgText("send:", WSAGetLastError());
+		}
+
+		for (int i = 100; i < 1000; i++)
+		{
+			char buf100[23];
+			string num = to_string(i);
+			string strWithNum = strText + num + "\n";
+			strcpy(buf100, strWithNum.c_str());
+			cout << buf100;
+			if ((lobufText = send(cC, buf100, strlen(buf100), NULL)) == SOCKET_ERROR)
+				throw  SetErrorMsgText("send:", WSAGetLastError());
+		}
+
+
+
+
+
+
+
 
 
 
