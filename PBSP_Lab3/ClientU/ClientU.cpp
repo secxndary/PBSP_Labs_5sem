@@ -40,7 +40,12 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		// =======================  TASK 6  =======================
+
+		int count;
+		cout << "Enter number of messages:\n";
+		cin >> count;
+
+
 
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -56,19 +61,31 @@ int main()
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000); 
-		serv.sin_addr.s_addr = inet_addr("192.168.56.104");
+		//								127.0.0.1
+		//								192.168.56.104
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1");
 		char obuf[50] = "Hello from ClientU";
 		int  lobuf = 0;
 		int lc = sizeof(serv);
-		if ((lobuf = sendto(cC, obuf, strlen(obuf) + 1, NULL, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
-			throw  SetErrorMsgText("sendto:", WSAGetLastError());
-		cout << "[CLIENT] Sent message:       " << obuf << endl;
 
 
-		// 4.
-		if (lobuf = recvfrom(cC, obuf, sizeof(obuf), NULL, (sockaddr*)&serv, &lc) == SOCKET_ERROR)
-			throw  SetErrorMsgText("recv:", WSAGetLastError());
-		cout << "[CLIENT] Recieved message:   " << obuf << endl;
+
+
+		// =======================  TASK 7  =======================
+
+		int time = clock();
+		for (int i = 0; i < count; i++)
+		{
+			if ((lobuf = sendto(cC, obuf, strlen(obuf) + 1, NULL, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
+				throw  SetErrorMsgText("sendto:", WSAGetLastError());
+			if (lobuf = recvfrom(cC, obuf, sizeof(obuf), NULL, (sockaddr*)&serv, &lc) == SOCKET_ERROR)
+				throw  SetErrorMsgText("recv:", WSAGetLastError());
+			cout << obuf << " " << i << endl;
+		}
+		cout << "\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n";
+
+
+
 
 
 		// 5.

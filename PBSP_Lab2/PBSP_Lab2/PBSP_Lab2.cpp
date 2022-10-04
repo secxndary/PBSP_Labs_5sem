@@ -45,20 +45,20 @@ int main()
 	try
 	{
 
-		//if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		//	throw  SetErrorMsgText("Startup:", WSAGetLastError());
-		//if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-		//	throw  SetErrorMsgText("socket:", WSAGetLastError());
-		////...........................................................
-		//SOCKADDR_IN serv;                     // параметры  сокета sS
-		//serv.sin_family = AF_INET;           // используется IP-адресация  
-		//serv.sin_port = htons(2000);          // порт 2000
-		//serv.sin_addr.s_addr = INADDR_ANY;   // любой собственный IP-адрес 
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+			throw  SetErrorMsgText("Startup:", WSAGetLastError());
+		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+			throw  SetErrorMsgText("socket:", WSAGetLastError());
+		//...........................................................
+		SOCKADDR_IN serv;                     // параметры  сокета sS
+		serv.sin_family = AF_INET;           // используется IP-адресация  
+		serv.sin_port = htons(2000);          // порт 2000
+		serv.sin_addr.s_addr = INADDR_ANY;   // любой собственный IP-адрес 
 
-		//if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
-		//	throw  SetErrorMsgText("bind:", WSAGetLastError());
-		//if (listen(sS, SOMAXCONN) == SOCKET_ERROR)
-		//	throw  SetErrorMsgText("listen:", WSAGetLastError());
+		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
+			throw  SetErrorMsgText("bind:", WSAGetLastError());
+		if (listen(sS, SOMAXCONN) == SOCKET_ERROR)
+			throw  SetErrorMsgText("listen:", WSAGetLastError());
 
 
 

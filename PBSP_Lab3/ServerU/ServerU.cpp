@@ -40,7 +40,6 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		// =======================  TASK 6  =======================
 		
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -53,7 +52,9 @@ int main()
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000);
-		serv.sin_addr.s_addr = inet_addr("192.168.56.104"); 
+		//							127.0.0.1
+		//							192.168.56.104
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1"); 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
 
@@ -62,21 +63,42 @@ int main()
 		SOCKADDR_IN clnt;	
 		clnt.sin_family = AF_INET;
 		clnt.sin_port = htons(2000);
-		clnt.sin_addr.s_addr = inet_addr("192.168.100.5");
+		//								127.0.0.1
+		//								192.168.100.5
+		clnt.sin_addr.s_addr = inet_addr("127.0.0.1");
 		memset(&clnt, 0, sizeof(clnt));   
 		int lc = sizeof(clnt);
 		char ibuf[50];    
-		int  lb = 0;         
-		if (lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc) == SOCKET_ERROR)
-			throw  SetErrorMsgText("recv:", WSAGetLastError());
-		cout << "[SERVER] Recieved message:   " << ibuf << endl;
+		int  lb = 0;     
 
 
-		// 4.
-		ibuf[17] = '!';		// some changes in data
-		if ((lb = sendto(sS, ibuf, strlen(ibuf) + 1, NULL, (sockaddr*)&clnt, sizeof(clnt))) == SOCKET_ERROR)
-			throw  SetErrorMsgText("sendto:", WSAGetLastError());
-		cout << "[SERVER] Sent message:       " << ibuf << endl;
+
+		// =======================  TASK 7  =======================
+
+		int i = 0;
+		while (true)
+		{
+			int lcInt = sizeof(clnt);
+			int time = clock();
+			while (true)
+			{
+				if (lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc) == SOCKET_ERROR)
+					break;
+
+				cout << ibuf << " " << i << "\n";
+				i++;
+
+				if (!strcmp(ibuf, "CLOSE"))
+					break;
+				if ((lb = sendto(sS, ibuf, strlen(ibuf) + 1, NULL, (sockaddr*)&clnt, sizeof(clnt))) == SOCKET_ERROR)
+					break;
+			}
+			i = 0;
+			cout << "\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n\n";
+		}
+
+		
+
 
 
 		// 5.
