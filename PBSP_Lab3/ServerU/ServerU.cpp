@@ -9,10 +9,10 @@ using namespace std;
 
 
 
-string  GetErrorMsgText(int code)  
+string  GetErrorMsgText(int code)
 {
 	string msgText;
-	switch (code)    
+	switch (code)
 	{
 	case WSAEINTR:          msgText = "WSAEINTR";         break;
 	case WSAEACCES:         msgText = "WSAEACCES";        break;
@@ -40,7 +40,7 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		
+
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
@@ -54,22 +54,22 @@ int main()
 		serv.sin_port = htons(2000);
 		//							127.0.0.1
 		//							192.168.56.104
-		serv.sin_addr.s_addr = inet_addr("127.0.0.1"); 
+		serv.sin_addr.s_addr = inet_addr("192.168.56.104");
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
 
 
 		// 3.
-		SOCKADDR_IN clnt;	
+		SOCKADDR_IN clnt;
 		clnt.sin_family = AF_INET;
 		clnt.sin_port = htons(2000);
 		//								127.0.0.1
 		//								192.168.100.5
-		clnt.sin_addr.s_addr = inet_addr("127.0.0.1");
-		memset(&clnt, 0, sizeof(clnt));   
+		clnt.sin_addr.s_addr = inet_addr("192.168.100.5");
+		memset(&clnt, 0, sizeof(clnt));
 		int lc = sizeof(clnt);
-		char ibuf[50];    
-		int  lb = 0;     
+		char ibuf[50];
+		int  lb = 0;
 
 
 
@@ -97,7 +97,7 @@ int main()
 			cout << "\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n\n";
 		}
 
-		
+
 
 
 
