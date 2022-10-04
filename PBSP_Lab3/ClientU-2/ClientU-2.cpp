@@ -10,10 +10,10 @@ using namespace std;
 
 
 
-string  GetErrorMsgText(int code)  
+string  GetErrorMsgText(int code)
 {
 	string msgText;
-	switch (code)                  
+	switch (code)
 	{
 	case WSAEINTR:          msgText = "WSAEINTR";         break;
 	case WSAEACCES:         msgText = "WSAEACCES";        break;
@@ -60,7 +60,7 @@ int main()
 		// 3.
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
-		serv.sin_port = htons(2000); 
+		serv.sin_port = htons(2000);
 		//								127.0.0.1
 		//								192.168.56.104
 		serv.sin_addr.s_addr = inet_addr("192.168.56.104");
