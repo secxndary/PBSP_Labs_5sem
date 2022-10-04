@@ -53,15 +53,22 @@ int main()
 
 
 		// 3.
-		SOCKADDR_IN serv; 
+		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000); 
 		serv.sin_addr.s_addr = inet_addr("127.0.0.1");
 		char obuf[50] = "Hello from ClientU";
 		int  lobuf = 0;
+		int lc = sizeof(serv);
 		if ((lobuf = sendto(cC, obuf, strlen(obuf) + 1, NULL, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw  SetErrorMsgText("sendto:", WSAGetLastError());
-		cout << "Sent message: " << obuf << endl;
+		cout << "[CLIENT] Sent message:       " << obuf << endl;
+
+
+		// 4.
+		if (lobuf = recvfrom(cC, obuf, sizeof(obuf), NULL, (sockaddr*)&serv, &lc) == SOCKET_ERROR)
+			throw  SetErrorMsgText("recv:", WSAGetLastError());
+		cout << "[CLIENT] Recieved message:   " << obuf << endl;
 
 
 		// 5.

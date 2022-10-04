@@ -60,13 +60,23 @@ int main()
 
 		// 3.
 		SOCKADDR_IN clnt;	
+		clnt.sin_family = AF_INET;
+		clnt.sin_port = htons(2000);
+		clnt.sin_addr.s_addr = inet_addr("127.0.0.1");
 		memset(&clnt, 0, sizeof(clnt));   
 		int lc = sizeof(clnt);
 		char ibuf[50];    
 		int  lb = 0;         
 		if (lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc) == SOCKET_ERROR)
 			throw  SetErrorMsgText("recv:", WSAGetLastError());
-		cout << "Recieved message: " << ibuf << endl;
+		cout << "[SERVER] Recieved message:   " << ibuf << endl;
+
+
+		// 4.
+		ibuf[17] = '!';		// some changes in data
+		if ((lb = sendto(sS, ibuf, strlen(ibuf) + 1, NULL, (sockaddr*)&clnt, sizeof(clnt))) == SOCKET_ERROR)
+			throw  SetErrorMsgText("sendto:", WSAGetLastError());
+		cout << "[SERVER] Sent message:       " << ibuf << endl;
 
 
 		// 5.
