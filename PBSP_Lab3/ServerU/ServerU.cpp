@@ -9,14 +9,13 @@ using namespace std;
 
 
 
-string  GetErrorMsgText(int code)    // cформировать текст ошибки 
+string  GetErrorMsgText(int code)  
 {
 	string msgText;
-	switch (code)                      // проверка кода возврата  
+	switch (code)    
 	{
 	case WSAEINTR:          msgText = "WSAEINTR";         break;
 	case WSAEACCES:         msgText = "WSAEACCES";        break;
-		//..........коды WSAGetLastError ..........................
 	case WSASYSCALLFAILURE: msgText = "WSASYSCALLFAILURE"; break;
 	default:                msgText = "***ERROR***";      break;
 	};
@@ -49,23 +48,25 @@ int main()
 
 
 		// 2.
-		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
+		if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
 			throw  SetErrorMsgText("socket:", WSAGetLastError());
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000);
-		serv.sin_addr.s_addr = INADDR_ANY; 
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1"); 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
 
 
 		// 3.
-		SOCKADDR_IN clnt;				  // параметры  сокета клиента
-		memset(&clnt, 0, sizeof(clnt));   // обнулить память
+		SOCKADDR_IN clnt;	
+		memset(&clnt, 0, sizeof(clnt));   
 		int lc = sizeof(clnt);
-		char ibuf[50];                    //буфер ввода 
-		int  lb = 0;                      //количество принятых байт
-		lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc);
+		char ibuf[50];    
+		int  lb = 0;         
+		if (lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc) == SOCKET_ERROR)
+			throw  SetErrorMsgText("recv:", WSAGetLastError());
+		cout << "Recieved message: " << ibuf << endl;
 
 
 		// 5.
