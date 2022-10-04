@@ -40,7 +40,7 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		// =======================  TASK 2  =======================
+		// =======================  TASK 6  =======================
 		
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -53,7 +53,7 @@ int main()
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000);
-		serv.sin_addr.s_addr = inet_addr("127.0.0.1"); 
+		serv.sin_addr.s_addr = inet_addr("192.168.56.104"); 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
 
@@ -62,7 +62,7 @@ int main()
 		SOCKADDR_IN clnt;	
 		clnt.sin_family = AF_INET;
 		clnt.sin_port = htons(2000);
-		clnt.sin_addr.s_addr = inet_addr("127.0.0.1");
+		clnt.sin_addr.s_addr = inet_addr("192.168.100.5");
 		memset(&clnt, 0, sizeof(clnt));   
 		int lc = sizeof(clnt);
 		char ibuf[50];    

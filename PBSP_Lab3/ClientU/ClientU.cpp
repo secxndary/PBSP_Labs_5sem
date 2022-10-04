@@ -40,7 +40,7 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		// =======================  TASK 3  =======================
+		// =======================  TASK 6  =======================
 
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -56,7 +56,7 @@ int main()
 		SOCKADDR_IN serv;
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(2000); 
-		serv.sin_addr.s_addr = inet_addr("127.0.0.1");
+		serv.sin_addr.s_addr = inet_addr("192.168.56.104");
 		char obuf[50] = "Hello from ClientU";
 		int  lobuf = 0;
 		int lc = sizeof(serv);
