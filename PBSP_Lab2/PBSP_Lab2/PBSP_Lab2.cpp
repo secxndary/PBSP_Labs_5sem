@@ -188,7 +188,7 @@ int main()
 		sockaddr_in s_adr;
 		{
 			s_adr.sin_port = htons(2000);
-			s_adr.sin_addr.S_un.S_addr = inet_addr("192.168.56.104");
+			s_adr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 			s_adr.sin_family = AF_INET;
 		}
 

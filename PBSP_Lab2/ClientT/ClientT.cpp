@@ -18,7 +18,6 @@ string GetErrorMsgText(int code)    // cформировать текст оши
 	{
 	case WSAEINTR:          msgText = "WSAEINTR";         break;
 	case WSAEACCES:         msgText = "WSAEACCES";        break;
-		//..........коды WSAGetLastError ..........................
 	case WSASYSCALLFAILURE: msgText = "WSASYSCALLFAILURE"; break;
 	default:                msgText = "***ERROR***";      break;
 	};
@@ -53,7 +52,7 @@ int main()
 		serv.sin_port = htons(2000);                   // TCP-порт 2000
 		//		192.168.56.104
 		//		127.0.0.1
-		serv.sin_addr.s_addr = inet_addr("192.168.56.104");  // адрес сервера
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1");  // адрес сервера
 		if ((connect(cC, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw  SetErrorMsgText("connect:", WSAGetLastError());
 
@@ -154,7 +153,6 @@ int main()
 			cout << ibuf << " " << (i + 1) << endl;
 		}
 		cout << "\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n";
-
 
 
 
