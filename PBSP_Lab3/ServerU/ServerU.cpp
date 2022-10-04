@@ -41,10 +41,12 @@ int main()
 	WSADATA wsaData;
 	try
 	{
-		// =======================  TASK 1  =======================
+		// =======================  TASK 2  =======================
+		
 		// 1.
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
+
 
 		// 2.
 		if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
@@ -55,6 +57,16 @@ int main()
 		serv.sin_addr.s_addr = INADDR_ANY; 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
+
+
+		// 3.
+		SOCKADDR_IN clnt;				  // параметры  сокета клиента
+		memset(&clnt, 0, sizeof(clnt));   // обнулить память
+		int lc = sizeof(clnt);
+		char ibuf[50];                    //буфер ввода 
+		int  lb = 0;                      //количество принятых байт
+		lb = recvfrom(sS, ibuf, sizeof(ibuf), NULL, (sockaddr*)&clnt, &lc);
+
 
 		// 5.
 		if (closesocket(sS) == SOCKET_ERROR)
