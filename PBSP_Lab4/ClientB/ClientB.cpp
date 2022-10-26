@@ -33,7 +33,7 @@ string SetErrorMsgText(string msgText, int code)
 SOCKET cC;
 
 
-bool  GetServer(
+bool GetServer(
 	char* call,					// [in] позывной сервера  
 	short            port,		// [in] номер порта сервера    
 	struct sockaddr* from,		// [out] указатель на SOCKADDR_IN
@@ -51,7 +51,7 @@ bool  GetServer(
 
 	SOCKADDR_IN all;                        // параметры  сокета sS
 	all.sin_family = AF_INET;               // используется IP-адресация  
-	all.sin_port = htons(2000);     // порт 2000
+	all.sin_port = htons(port);				// порт 2000
 	all.sin_addr.s_addr = INADDR_BROADCAST; // всем 
 	char clientCall[50];
 
@@ -74,10 +74,10 @@ bool  GetServer(
 
 
 	if (!strcmp(clientCall, call))
-		cout << "\n[OK] Found server with callname: " << call << "\n";
+		cout << "[OK] Found server with callname: " << call << "\n\n";
 	else
 	{
-		cout << "\n[ERROR] Did not found server with callname: " << call << "\n";
+		cout << "[ERROR] Did not found server with callname: " << call << "\n\n";
 		return false;
 	}
 

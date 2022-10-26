@@ -118,6 +118,66 @@ bool PutAnswerToClient(
 
 
 
+bool GetServer(
+	char* call,					// [in] позывной сервера  
+	short            port,		// [in] номер порта сервера    
+	struct sockaddr* from,		// [out] указатель на SOCKADDR_IN
+	int* flen					// [out] указатель на размер from 
+)
+{
+	memset(from, 0, sizeof(flen));
+	int optval = 1;
+	SOCKET cC;
+	int countOfServers = 0;
+	int timeout = 5000;
+
+	if ((cC = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
+		throw SetErrorMsgText("socket:", WSAGetLastError());
+
+	if (setsockopt(cC, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
+		throw SetErrorMsgText("opt:", WSAGetLastError());
+
+	// we need this to prevent the server from going into standby mode
+	if (setsockopt(cC, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
+		throw SetErrorMsgText("opt:", WSAGetLastError());
+
+
+	SOCKADDR_IN all;                        // параметры  сокета sS
+	all.sin_family = AF_INET;               // используется IP-адресация  
+	all.sin_port = htons(port);				// порт 2000
+	all.sin_addr.s_addr = INADDR_BROADCAST; // всем 
+	char clientCall[50];
+
+
+	if ((sendto(cC, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all))) == SOCKET_ERROR)
+		throw SetErrorMsgText("sendto:", WSAGetLastError());
+
+
+	if ((recvfrom(cC, clientCall, sizeof(clientCall), NULL, from, flen)) == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() == WSAETIMEDOUT)
+			return false;
+		else
+			throw SetErrorMsgText("recv:", WSAGetLastError());
+	}
+
+
+
+
+	if (!strcmp(clientCall, call))
+	{
+		++countOfServers;
+		cout << "[INFO] Found server #" << countOfServers;
+		SOCKADDR_IN* addr = (SOCKADDR_IN*)&from;
+		cout << "[INFO] Server port: " << addr->sin_port << "\n";
+		cout << "[INFO] Server IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n";
+		return true;
+	}
+
+}
+
+
+
 
 
 
@@ -137,14 +197,19 @@ int main()
 		throw  SetErrorMsgText("Startup:", WSAGetLastError());
 
 
+
+	// find servers with the same port
+	GetServer(name, 2000, (sockaddr*)&clnt, &lc);
+
 	
+
 	// get request and put answer
 	while (true)
 	{
 		if (GetRequestFromClient(name, 2000, (sockaddr*)&clnt, &lc))
 			PutAnswerToClient(name, (sockaddr*)&clnt, &lc);
-		else
-			PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
+		// (you can uncomment this if you want to)
+		// else PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
 
 		SOCKADDR_IN* addr = (SOCKADDR_IN*)&clnt;
 		cout << "\n[INFO] Client port: " << addr->sin_port;
