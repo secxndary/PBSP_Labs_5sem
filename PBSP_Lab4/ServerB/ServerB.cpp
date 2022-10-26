@@ -42,7 +42,7 @@ bool GetRequestFromClient(
 )
 {
 	// 0.
-	char serverName[20];
+	char clientName[20];
 	memset(from, 0, sizeof(flen));
 
 
@@ -62,7 +62,7 @@ bool GetRequestFromClient(
 
 
 	// 3.
-	if (recvfrom(sS, serverName, sizeof(serverName), NULL, from, flen) == SOCKET_ERROR)
+	if (recvfrom(sS, clientName, sizeof(clientName), NULL, from, flen) == SOCKET_ERROR)
 	{
 		if (WSAGetLastError() == WSAETIMEDOUT)
 			return false;
@@ -73,14 +73,14 @@ bool GetRequestFromClient(
 
 
 	// compare server-name
-	if (!strcmp(serverName, name))
+	if (!strcmp(clientName, name))
 	{
-		cout << "[OK] Correct server callsign.\n";
+		cout << "[OK] Correct server callsign: " << clientName << "\n";
 		return true;
 	}
 	else
 	{
-		cout << "[ERROR] Incorrect server callsign.\n";
+		cout << "[ERROR] Incorrect server callsign: " << clientName << "\n";
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool PutAnswerToClient(
 		throw  SetErrorMsgText("send:", WSAGetLastError());
 	}
 
-	cout << "[OK] The response was sent to the client.\n";
+	cout << "[OK] The response was sent to the client: " << name << "\n";
 	return true;
 }
 
