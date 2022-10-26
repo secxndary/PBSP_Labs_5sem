@@ -54,7 +54,7 @@ int main()
 		serv.sin_port = htons(2000);
 		//							127.0.0.1
 		//							192.168.56.104
-		serv.sin_addr.s_addr = inet_addr("192.168.56.104");
+		serv.sin_addr.s_addr = inet_addr("127.0.0.1");
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw  SetErrorMsgText("bind:", WSAGetLastError());
 
@@ -65,7 +65,7 @@ int main()
 		clnt.sin_port = htons(2000);
 		//								127.0.0.1
 		//								192.168.100.5
-		clnt.sin_addr.s_addr = inet_addr("192.168.100.5");
+		clnt.sin_addr.s_addr = inet_addr("127.0.0.1");
 		memset(&clnt, 0, sizeof(clnt));
 		int lc = sizeof(clnt);
 		char ibuf[50];

@@ -31,6 +31,11 @@ string SetErrorMsgText(string msgText, int code)
 
 
 
+
+
+
+
+
 SOCKET  sS;
 
 
@@ -72,7 +77,7 @@ bool GetRequestFromClient(
 
 
 
-	// compare server-name
+	// compare server callsign
 	if (!strcmp(clientName, name))
 	{
 		cout << "[OK] Correct server callsign: " << clientName << "\n";
@@ -137,17 +142,13 @@ int main()
 	while (true)
 	{
 		if (GetRequestFromClient(name, 2000, (sockaddr*)&clnt, &lc))
-		{
 			PutAnswerToClient(name, (sockaddr*)&clnt, &lc);
-		}
 		else
-		{
-			PutAnswerToClient((char*)"[ERROR]", (sockaddr*)&clnt, &lc);
-		}
+			PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
 
 		SOCKADDR_IN* addr = (SOCKADDR_IN*)&clnt;
 		cout << "\n[INFO] Client port: " << addr->sin_port;
-		cout << "\n[INFO] Client IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n";
+		cout << "\n[INFO] Client IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n\n\n";
 
 		if (closesocket(sS) == SOCKET_ERROR)
 			throw  SetErrorMsgText("closesocket:", WSAGetLastError());

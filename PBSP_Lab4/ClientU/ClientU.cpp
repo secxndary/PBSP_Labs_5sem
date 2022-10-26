@@ -75,9 +75,11 @@ int main()
 		if ((lobuf = sendto(cC, obuf, strlen(obuf) + 1, NULL, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
 			throw SetErrorMsgText("sendto:", WSAGetLastError());
 		cout << "\n[OK] Sent message: " << obuf;
+
 		if (lobuf = recvfrom(cC, obuf, sizeof(obuf), NULL, (sockaddr*)&serv, &lc) == SOCKET_ERROR)
 			throw SetErrorMsgText("recv:", WSAGetLastError());
 		cout << "\n[OK] Received message: " << obuf;
+
 		cout << "\n\nProgram was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n";
 
 
