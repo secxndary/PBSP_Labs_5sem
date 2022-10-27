@@ -40,10 +40,10 @@ SOCKET  sS;
 
 
 bool GetRequestFromClient(
-    char* name,                 // [in] позывной сервера  
-    short port,                 // [in] номер просушиваемого порта 
-    struct sockaddr* from,      // [out] указатель на SOCKADDR_IN
-    int* flen                   // [out] указатель на размер from 
+	char* name,                 // [in] позывной сервера  
+	short port,                 // [in] номер просушиваемого порта 
+	struct sockaddr* from,      // [out] указатель на SOCKADDR_IN
+	int* flen                   // [out] указатель на размер from 
 )
 {
 	// 0.
@@ -131,47 +131,66 @@ bool GetServer(
 	int countOfServers = 0;
 	int timeout = 5000;
 
-	if ((cC = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-		throw SetErrorMsgText("socket:", WSAGetLastError());
+	try
+	{
+		if ((cC = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
+			throw SetErrorMsgText("socket:", WSAGetLastError());
 
-	if (setsockopt(cC, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
-		throw SetErrorMsgText("opt:", WSAGetLastError());
+		if (setsockopt(cC, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
+			throw SetErrorMsgText("opt:", WSAGetLastError());
 
-	// we need this to prevent the server from going into standby mode
-	if (setsockopt(cC, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
-		throw SetErrorMsgText("opt:", WSAGetLastError());
-
-
-	SOCKADDR_IN all;                        // параметры  сокета sS
-	all.sin_family = AF_INET;               // используется IP-адресация  
-	all.sin_port = htons(port);				// порт 2000
-	all.sin_addr.s_addr = INADDR_BROADCAST; // всем 
-	char clientCall[50];
+		// we need this to prevent the server from going into standby mode
+		if (setsockopt(cC, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
+			throw SetErrorMsgText("opt:", WSAGetLastError());
 
 
-	if ((sendto(cC, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all))) == SOCKET_ERROR)
-		throw SetErrorMsgText("sendto:", WSAGetLastError());
+		SOCKADDR_IN all;                        // параметры  сокета sS
+		all.sin_family = AF_INET;               // используется IP-адресация  
+		all.sin_port = htons(port);				// порт 2000
+		all.sin_addr.s_addr = INADDR_BROADCAST; // всем 
+		char clientCall[50];
 
 
-	if ((recvfrom(cC, clientCall, sizeof(clientCall), NULL, from, flen)) == SOCKET_ERROR)
+		if ((sendto(cC, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all))) == SOCKET_ERROR)
+			throw SetErrorMsgText("sendto:", WSAGetLastError());
+		//cout << "[OK] Sent message: " << call << "\n";
+
+
+		if ((recvfrom(cC, clientCall, sizeof(clientCall), NULL, from, flen)) == SOCKET_ERROR)
+		{
+			/*if (WSAGetLastError() == WSAETIMEDOUT)
+				return false;
+			else*/
+			throw SetErrorMsgText("recv:", WSAGetLastError());
+		}
+		//cout << "[OK] Received message: " << clientCall << "\n";
+
+
+
+
+		if (!strcmp(clientCall, call))
+		{
+			++countOfServers;
+			cout << "[INFO] Found server #" << countOfServers << "\n";
+			SOCKADDR_IN* addr = (SOCKADDR_IN*)&from;
+			cout << "[INFO] Server port: " << addr->sin_port << "\n";
+			cout << "[INFO] Server IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n";
+			return true;
+		}
+		else
+			cout << "[ERROR] Did not found server with callname: " << call << "\n\n";
+
+	}
+	catch (string errorMsgText)
 	{
 		if (WSAGetLastError() == WSAETIMEDOUT)
-			return false;
+		{
+			cout << "Number of servers: " << countOfServers << endl;
+			if (closesocket(cC) == SOCKET_ERROR)
+				throw SetErrorMsgText("closesocket:", WSAGetLastError());
+		}
 		else
-			throw SetErrorMsgText("recv:", WSAGetLastError());
-	}
-
-
-
-
-	if (!strcmp(clientCall, call))
-	{
-		++countOfServers;
-		cout << "[INFO] Found server #" << countOfServers;
-		SOCKADDR_IN* addr = (SOCKADDR_IN*)&from;
-		cout << "[INFO] Server port: " << addr->sin_port << "\n";
-		cout << "[INFO] Server IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n";
-		return true;
+			throw SetErrorMsgText("GetServer:", WSAGetLastError());
 	}
 
 }
@@ -194,14 +213,14 @@ int main()
 
 	// 1.
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		throw  SetErrorMsgText("Startup:", WSAGetLastError());
+		throw SetErrorMsgText("Startup:", WSAGetLastError());
 
 
 
 	// find servers with the same port
 	GetServer(name, 2000, (sockaddr*)&clnt, &lc);
 
-	
+
 
 	// get request and put answer
 	while (true)
