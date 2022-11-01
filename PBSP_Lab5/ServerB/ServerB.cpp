@@ -55,7 +55,7 @@ bool GetRequestFromClient(
 
 	// 2.
 	if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-		throw  SetErrorMsgText("socket:", WSAGetLastError());
+		throw SetErrorMsgText("socket:", WSAGetLastError());
 
 	SOCKADDR_IN serv;
 	serv.sin_family = AF_INET;
@@ -63,7 +63,7 @@ bool GetRequestFromClient(
 	serv.sin_addr.s_addr = INADDR_ANY;
 
 	if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
-		throw  SetErrorMsgText("bind:", WSAGetLastError());
+		throw SetErrorMsgText("bind:", WSAGetLastError());
 
 
 
@@ -81,7 +81,7 @@ bool GetRequestFromClient(
 	// compare server callsign
 	if (!strcmp(clientName, name))
 	{
-		cout << "[OK] Correct server callsign: " << clientName << "\n";
+		cout << "\n\n[OK] Correct server callsign: " << clientName << "\n";
 		return true;
 	}
 	else
@@ -185,7 +185,7 @@ bool GetServer(
 	{
 		if (WSAGetLastError() == WSAETIMEDOUT)
 		{
-			cout << "Number of servers: " << countOfServers << endl;
+			//cout << "Number of servers: " << countOfServers << endl;
 			if (closesocket(cC) == SOCKET_ERROR)
 				throw SetErrorMsgText("closesocket:", WSAGetLastError());
 		}
@@ -200,47 +200,72 @@ bool GetServer(
 
 
 
+
+
+
 int main()
 {
 	// 0.
 	setlocale(LOCALE_ALL, "ru");
 	WSADATA wsaData;
 	SOCKADDR_IN clnt;
+	SOCKADDR_IN serv;
 	int lc = sizeof(clnt);
 	char name[] = "Hello";
+	serv.sin_family = AF_INET;
+	serv.sin_port = htons(2000);
+	serv.sin_addr.s_addr = INADDR_ANY;
+	//serv.sin_addr.s_addr = inet_addr("192.168.157.99");
+	memset(&clnt, 0, sizeof(clnt));
+	int optval = 1;
 
 
 
-	// 1.
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		throw SetErrorMsgText("Startup:", WSAGetLastError());
 
-
-
-	// find servers with the same port
-	GetServer(name, 2000, (sockaddr*)&clnt, &lc);
-
-
-
-	// get request and put answer
-	while (true)
+	try
 	{
-		if (GetRequestFromClient(name, 2000, (sockaddr*)&clnt, &lc))
-			PutAnswerToClient(name, (sockaddr*)&clnt, &lc);
-		// (you can uncomment this if you want to)
-		// else PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
+		// 1.
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+			throw SetErrorMsgText("Startup:", WSAGetLastError());
 
-		SOCKADDR_IN* addr = (SOCKADDR_IN*)&clnt;
-		cout << "\n[INFO] Client port: " << addr->sin_port;
-		cout << "\n[INFO] Client IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n\n\n";
 
-		if (closesocket(sS) == SOCKET_ERROR)
-			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
+
+		// find servers with the same port
+		GetServer(name, 2000, (sockaddr*)&clnt, &lc);
+
+
+
+		// get request and put answer
+		while (true)
+		{
+			if (GetRequestFromClient(name, 2000, (sockaddr*)&clnt, &lc))
+				PutAnswerToClient(name, (sockaddr*)&clnt, &lc);
+			// (you can uncomment this if you want to)
+			// else PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
+
+			SOCKADDR_IN* addr = (SOCKADDR_IN*)&clnt;
+			hostent* chostname = gethostbyaddr((char*)&clnt.sin_addr, sizeof(clnt.sin_addr), AF_INET);
+			cout << "\n[INFO] Client name:  " << chostname->h_name;
+			cout << "\n[INFO] Client IP:    " << inet_ntoa(addr->sin_addr);
+			cout << "\n[INFO] Client port:  " << addr->sin_port;
+			cout << "\n\n\n-------------------------------------------------\n";
+
+
+			if (closesocket(sS) == SOCKET_ERROR)
+				throw  SetErrorMsgText("closesocket:", WSAGetLastError());
+		}
+
+
+
+		// 5.
+		if (WSACleanup() == SOCKET_ERROR)
+			throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+
+
 	}
-
-
-
-	// 5.
-	if (WSACleanup() == SOCKET_ERROR)
-		throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+	catch (string errorMsgText)
+	{
+		cout << "\n[FATAL] WSAGetLastError: " << errorMsgText << "\n\n";
+	}
+	
 }

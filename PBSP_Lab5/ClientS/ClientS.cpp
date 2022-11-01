@@ -95,9 +95,9 @@ bool GetServerByName(
 		
 
 		SOCKADDR_IN* server = (SOCKADDR_IN*)&from;
-		cout << "[INFO] Server name: " << host->h_name << "\n";
-		cout << "[INFO] Server IP:   " << inet_ntoa(server->sin_addr) << "\n";
-		cout << "[INFO] Server port: " << server->sin_port << "\n\n";
+		cout << "[INFO] Server name:  " << host->h_name << "\n";
+		cout << "[INFO] Server IP:    " << inet_ntoa(server->sin_addr) << "\n";
+		cout << "[INFO] Server port:  " << server->sin_port << "\n\n";
 
 		return true;
 
