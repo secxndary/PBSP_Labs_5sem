@@ -16,7 +16,8 @@ int main()
 {
 	setlocale(LC_ALL, "ru");
 	HANDLE sH;	// дескриптор канала
-
+	DWORD lp;
+	char buf[50];
 
 	try
 	{
@@ -27,19 +28,36 @@ int main()
 			PIPE_TYPE_MESSAGE | PIPE_WAIT,		// сообщения|синхронный
 			1, NULL, NULL,						// максимум 1 экземпляр
 			INFINITE, NULL)) == INVALID_HANDLE_VALUE)
-		throw SetPipeError("create:", GetLastError());
+		throw SetPipeError("Create: ", GetLastError());
 
 		if (!ConnectNamedPipe(sH, NULL))        // ожидать клиента   
-			throw SetPipeError("connect:", GetLastError());
+			throw SetPipeError("Connect: ", GetLastError());
+
+
+
+
+			// 2. 
+			if (ReadFile(sH, buf, sizeof(buf), &lp, NULL)) 
+			{
+				cout << "[OK] Received message: " << buf << endl;
+
+
+
+				// 3.
+				if (!WriteFile(sH, buf, sizeof(buf), &lp, NULL))
+					throw SetPipeError("WriteFile: ", GetLastError());
+			}
+
+			else throw SetPipeError("ReadFile: ", GetLastError());
 
 
 
 
 		// 4.
 		if (!DisconnectNamedPipe(sH))
-			throw SetPipeError("disconnect:", GetLastError());
+			throw SetPipeError("Disconnect: ", GetLastError());
 		if (!CloseHandle(sH))
-			throw SetPipeError("close:", GetLastError());
+			throw SetPipeError("Close: ", GetLastError());
 	}
 	catch (string ErrorPipeText)
 	{
