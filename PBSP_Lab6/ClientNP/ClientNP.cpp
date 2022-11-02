@@ -18,9 +18,11 @@ using namespace std;
 int main()
 {
 	setlocale(LC_ALL, "ru");
+	int countOfMessages = 0;
 	HANDLE cH; // дескриптор канала
 	DWORD lp;
 	char buf[50];
+
 
 
 	try
@@ -37,19 +39,25 @@ int main()
 
 
 
-		// 2.
-		string obuf = "Hello from ClientNP ";
-		if (!WriteFile(cH, obuf.c_str(), sizeof(obuf), &lp, NULL))
+		cout << "Enter number of messages: ";
+		cin >> countOfMessages;
+		for (int i = 1; i <= countOfMessages; ++i)
+		{
+			string obuf = "Hello from ClientNP " + to_string(i);
+
+			// 2.
+			if (!WriteFile(cH, obuf.c_str(), sizeof(obuf), &lp, NULL))
+				throw SetPipeError("WriteFile: ", GetLastError());
+
+			// 3.
+			if (!ReadFile(cH, buf, sizeof(buf), &lp, NULL))
+				throw SetPipeError("ReadFile: ", GetLastError());
+
+			cout << "[OK] Sent message: " << buf << endl;
+		}
+		
+		if (!WriteFile(cH, STOP, sizeof(STOP), &lp, NULL))
 			throw SetPipeError("WriteFile: ", GetLastError());
-
-
-
-		// 3.
-		if (!ReadFile(cH, buf, sizeof(buf), &lp, NULL))
-			throw SetPipeError("ReadFile: ", GetLastError());
-		cout << "[OK] Sent message: " << buf << endl;
-
-
 
 
 		// 4.

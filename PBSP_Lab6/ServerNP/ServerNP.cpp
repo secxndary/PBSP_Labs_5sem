@@ -5,6 +5,7 @@
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
 #define PIPE_NAME L"\\\\.\\pipe\\Tube"
+#define STOP "STOP"
 using namespace std;
 
 
@@ -36,20 +37,23 @@ int main()
 
 
 
+		while (true)
+		{
 			// 2. 
-			if (ReadFile(sH, buf, sizeof(buf), &lp, NULL)) 
+			if (ReadFile(sH, buf, sizeof(buf), &lp, NULL))
 			{
+				if (strcmp(buf, STOP) == 0)	
+					break;
 				cout << "[OK] Received message: " << buf << endl;
-
-
 
 				// 3.
 				if (!WriteFile(sH, buf, sizeof(buf), &lp, NULL))
 					throw SetPipeError("WriteFile: ", GetLastError());
 			}
-
-			else throw SetPipeError("ReadFile: ", GetLastError());
-
+			else 
+				throw SetPipeError("ReadFile: ", GetLastError());
+		}
+			
 
 
 
