@@ -4,6 +4,7 @@
 #include "ErrorMessage.h"
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
+#define PIPE_NAME L"\\\\.\\pipe\\Tube"
 using namespace std;
 
 
@@ -13,13 +14,15 @@ using namespace std;
 
 int main()
 {
+	setlocale(LC_ALL, "ru");
 	HANDLE sH;	// дескриптор канала
 
 
 	try
 	{
 		// 1.
-		if ((sH = CreateNamedPipe(L"\\\\.\\pipe\\Tube",
+		if ((sH = CreateNamedPipe(
+			PIPE_NAME,
 			PIPE_ACCESS_DUPLEX,					// дуплексный канал 
 			PIPE_TYPE_MESSAGE | PIPE_WAIT,		// сообщения|синхронный
 			1, NULL, NULL,						// максимум 1 экземпляр

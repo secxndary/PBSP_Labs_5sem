@@ -1,120 +1,46 @@
 ﻿#include <iostream>
 #include "Winsock2.h"
+#include "Windows.h"
+#include "ErrorMessage.h"
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
+#define PIPE_NAME L"\\\\.\\pipe\\Tube"
 using namespace std;
 
 
 
 
-string GetErrorMsgText(int code)
+
+
+
+
+int main()
 {
-	string msgText;
-	switch (code)
+	setlocale(LC_ALL, "ru");
+	HANDLE cH; // дескриптор канала
+
+
+	try
 	{
-	case WSAEINTR:          msgText = "WSAEINTR";         break;
-	case WSAEACCES:         msgText = "WSAEACCES";        break;
-	case WSASYSCALLFAILURE: msgText = "WSASYSCALLFAILURE"; break;
-	default:                msgText = "***ERROR***";      break;
-	};
-	return msgText;
-};
-
-
-string SetErrorMsgText(string msgText, int code)
-{
-	return msgText + GetErrorMsgText(code);
-}
+		// 1.
+		if ((cH = CreateFile(
+			PIPE_NAME,
+			GENERIC_READ | GENERIC_WRITE,
+			FILE_SHARE_READ | FILE_SHARE_WRITE,
+			NULL, OPEN_EXISTING, NULL,
+			NULL)) == INVALID_HANDLE_VALUE)
+		throw  SetPipeError("CreateFile: ", GetLastError());
 
 
 
 
+		// 4.
+		if (!CloseHandle(cH))
+			throw SetPipeError("close:", GetLastError());
+	}
+	catch (string ErrorPipeText)
+	{
+		cout << endl << ErrorPipeText;
+	}
 
-
-
-
-
-int main()
-{
-
-}
-
-
-
-
-
-
-
-
-
-
-
-#include <iostream>
-#include <clocale>
-#include <ctime>
-
-#include "ErrorMsgText.h"
-#include "Windows.h"
-
-// локайльный формат имени канала, "." - локальный пк
-#define NAME L"\\\\.\\pipe\\Tube"
-// в сетевом формате "." меняется на имя пк
-
-using namespace std;
-
-int main()
-{
-    setlocale(LC_ALL, "rus");
-
-    HANDLE sH;
-    DWORD lp;
-    char buf[50];
-
-    try {
-        cout << "ServerNP\n\n";
-
-        // создать именованный канал
-        if ((sH = CreateNamedPipe(NAME, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE | PIPE_WAIT, 1, NULL, NULL, INFINITE, NULL)) == INVALID_HANDLE_VALUE)
-            throw SetPipeError("CreateNamedPipe: ", GetLastError());
-
-        while (true) {
-            cout << "Awaiting connection...\n\n";
-
-            // соединить сервер с каналом (соединяется с CreateFile на клиенте)
-            if (!ConnectNamedPipe(sH, NULL))
-                throw SetPipeError("ConnectNamedPipe: ", GetLastError());
-
-            while (true) {
-                // чтение данных из канала в буфер
-                if (ReadFile(sH, buf, sizeof(buf), &lp, NULL)) {
-                    if (strcmp(buf, "STOP") == 0) {
-                        cout << endl;
-                        break;
-                    }
-                    cout << buf << endl;
-
-                    // запись данных в канал
-                    if (WriteFile(sH, buf, sizeof(buf), &lp, NULL)) {
-                        if (strstr(buf, "ClientNPct")) break;
-                    }
-
-                    else throw SetPipeError("WriteFile: ", GetLastError());
-                }
-
-                else throw SetPipeError("ReadFile: ", GetLastError());
-            }
-
-            // закончить обмен данными
-            if (!DisconnectNamedPipe(sH))
-                throw SetPipeError("DisconnectNamedPipe: ", GetLastError());
-        }
-
-        if (!CloseHandle(sH))
-            throw SetPipeError("CloseHandle: ", GetLastError());
-
-        system("pause");
-    }
-    catch (string ErrorPipeText) {
-        cout << endl << ErrorPipeText;
-    }
 }
