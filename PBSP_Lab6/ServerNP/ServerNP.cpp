@@ -6,6 +6,7 @@
 #pragma warning(disable:4996)
 #define PIPE_NAME L"\\\\.\\pipe\\Tube"
 #define STOP "STOP"
+#define CALLNP "Hello from ClientNPct 1"
 using namespace std;
 
 
@@ -42,13 +43,16 @@ int main()
 			// 2. 
 			if (ReadFile(sH, buf, sizeof(buf), &lp, NULL))
 			{
-				if (strcmp(buf, STOP) == 0)	
+				if (strcmp(buf, STOP) == 0)
 					break;
 				cout << "[OK] Received message: " << buf << endl;
+				
 
 				// 3.
 				if (!WriteFile(sH, buf, sizeof(buf), &lp, NULL))
 					throw SetPipeError("WriteFile: ", GetLastError());
+				if (strcmp(buf, CALLNP) == 0)
+					break;
 			}
 			else 
 				throw SetPipeError("ReadFile: ", GetLastError());
@@ -65,7 +69,7 @@ int main()
 	}
 	catch (string ErrorPipeText)
 	{
-		cout << endl << ErrorPipeText;
+		cout << "\n[FATAL] " << ErrorPipeText;
 	}
 
 }

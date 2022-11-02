@@ -69,7 +69,7 @@ int main()
 	}
 	catch (string ErrorPipeText)
 	{
-		cout << endl << ErrorPipeText;
+		cout << "\n[FATAL] " << ErrorPipeText;
 	}
 
 }
