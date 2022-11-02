@@ -5,7 +5,7 @@
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
 #define PIPE_NAME L"\\\\.\\pipe\\Tube"
-#define PIPE_NAME_LAN L"\\\\DESKTOP-8HNL9IM\\pipe\\Tube"	
+#define PIPE_NAME_LAN L"\\\\secxndary\\pipe\\Tube"	
 #define STOP "STOP"
 using namespace std;
 
@@ -37,7 +37,7 @@ int main()
 			FILE_SHARE_READ | FILE_SHARE_WRITE,		// [in] режим совместного использования
 			NULL, OPEN_EXISTING, NULL,				// [in] атрибуты безопасности, флаги открытия канала
 			NULL)) == INVALID_HANDLE_VALUE)
-		throw  SetPipeError("CreateFile: ", GetLastError());
+		throw SetPipeError("CreateFile: ", GetLastError());
 
 
 
