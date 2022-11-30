@@ -1,246 +1,162 @@
-﻿#include <iostream>
+﻿#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+#include <iostream>
+#include <string>
+
 #include "Winsock2.h"
-#pragma comment (lib, "WS2_32.lib")
-#pragma warning(disable:4996)
+#include "ErrorMessage.h"
+#pragma comment(lib, "WS2_32.lib")
 using namespace std;
 
 
+int countServers = 1;
+bool GetRequestFromClient(char* name, short port, struct sockaddr* from, int* flen);
+bool PutAnswerToClient(char* name, struct sockaddr* to, int* lto);
+void GetServer(char* call, short port, struct sockaddr* from, int* flen);
 
+SOCKET sS;
 
-
-string GetErrorMsgText(int code)
+int main(int argc, char* argv[])
 {
-	string msgText;
-	switch (code)
-	{
-	case WSAEINTR:          msgText = "WSAEINTR";         break;
-	case WSAEACCES:         msgText = "WSAEACCES";        break;
-	case WSASYSCALLFAILURE: msgText = "WSASYSCALLFAILURE"; break;
-	default:                msgText = "***ERROR***";      break;
-	};
-	return msgText;
-};
+    setlocale(LC_ALL, "ru");
+    // позывной сервера
+    char NAME[6] = "Hello";
+    WSADATA wsaData;
+    SOCKADDR_IN server;
+    SOCKADDR_IN client;
 
+    server.sin_family = AF_INET;
+    server.sin_port = htons(2000);
+    server.sin_addr.s_addr = INADDR_ANY;
+    //server.sin_addr.s_addr = inet_addr("192.168.157.99");
 
-string SetErrorMsgText(string msgText, int code)
-{
-	return msgText + GetErrorMsgText(code);
+    memset(&client, 0, sizeof(client));
+    int lclient = sizeof(client);
+    int lserver = sizeof(server);
+
+    int optval = 1;
+
+    cout << "Server callsign: " << NAME << endl;
+    try
+    {
+        if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)                              throw SetErrorMsgText("Startup:", WSAGetLastError());
+
+        GetServer(NAME, 2000, (sockaddr*)&client, &lclient);
+        if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)             throw SetErrorMsgText("socket:", WSAGetLastError());
+        if (bind(sS, (LPSOCKADDR)&server, sizeof(server)) == SOCKET_ERROR)          throw SetErrorMsgText("bind:", WSAGetLastError());
+
+        char serverhostname[128] = "";
+        if (gethostname(serverhostname, sizeof(serverhostname)) == SOCKET_ERROR)    throw SetErrorMsgText("gethostname:", WSAGetLastError());
+        cout << "Server Hostname: " << serverhostname << endl;
+
+        while (true)
+        {
+            if (GetRequestFromClient(NAME, htons(2000), (sockaddr*)&client, &lclient)) {
+                // если успешно обработан запрос, отправляем ответ
+                PutAnswerToClient(NAME, (sockaddr*)&client, &lclient);
+                hostent* chostname = gethostbyaddr((char*)&client.sin_addr, sizeof(client.sin_addr), AF_INET);
+                cout << "Client Hostname: " << chostname->h_name << endl;
+            }
+        }
+
+        if (closesocket(sS) == SOCKET_ERROR)             throw SetErrorMsgText("closesocket:", WSAGetLastError());
+        if (WSACleanup() == SOCKET_ERROR)                throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+    }
+    catch (string errorMsgText)
+    {
+        cout << endl << "WSAGetLastError: " << errorMsgText;
+    }
+    return 0;
 }
 
+// обработать запрос клиента: true если пришел запрос, иначе false
+// параметры: позывной сервера, номер порта, указатель на параметры, указатель на размер параметров
+bool GetRequestFromClient(char* name, short port, struct sockaddr* from, int* flen) {
+    char bfrom[50];
+    try {
+        while (true) {
+            // ожидание запроса от клиента
+            if (recvfrom(sS, bfrom, sizeof(bfrom), NULL, from, flen) == SOCKET_ERROR) throw SetErrorMsgText("GetRequestFromClient recvfrom: ", WSAGetLastError());
 
-
-
-
-
-
-
-
-
-SOCKET  sS;
-
-
-bool GetRequestFromClient(
-	char* name,                 // [in] позывной сервера  
-	short port,                 // [in] номер просушиваемого порта 
-	struct sockaddr* from,      // [out] указатель на SOCKADDR_IN
-	int* flen                   // [out] указатель на размер from 
-)
-{
-	// 0.
-	char clientName[20];
-	memset(from, 0, sizeof(flen));
-
-
-
-	// 2.
-	if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-		throw  SetErrorMsgText("socket:", WSAGetLastError());
-
-	SOCKADDR_IN serv;
-	serv.sin_family = AF_INET;
-	serv.sin_port = htons(port);
-	serv.sin_addr.s_addr = INADDR_ANY;
-
-	if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
-		throw  SetErrorMsgText("bind:", WSAGetLastError());
-
-
-
-	// 3.
-	if (recvfrom(sS, clientName, sizeof(clientName), NULL, from, flen) == SOCKET_ERROR)
-	{
-		if (WSAGetLastError() == WSAETIMEDOUT)
-			return false;
-		else
-			throw SetErrorMsgText("recvfrom:", WSAGetLastError());
-	}
-
-
-
-	// compare server callsign
-	if (!strcmp(clientName, name))
-	{
-		cout << "[OK] Correct server callsign: " << clientName << "\n";
-		return true;
-	}
-	else
-	{
-		cout << "[ERROR] Incorrect server callsign: " << clientName << "\n";
-		return false;
-	}
-
+            // если позывной сервера совпал с сообщением от клиента
+            if (strcmp(name, bfrom) == 0) {
+                cout << endl << "Client IP: " << inet_ntoa(((struct sockaddr_in*)from)->sin_addr) << endl;
+                cout << "Client Port: " << ntohs(((struct sockaddr_in*)from)->sin_port) << endl;
+                return true;
+            }
+        }
+    }
+    catch (string errorMsgText)
+    {
+        if (WSAGetLastError() == WSAETIMEDOUT) return false;
+        //throw SetErrorMsgText("GetRequestFromClient:", WSAGetLastError());
+    }
 }
 
-
-
-
-
-
-
-bool PutAnswerToClient(
-	char* name,				// [in] позывной сервера  
-	struct sockaddr* to,	// [in] указатель на SOCKADDR_IN
-	int* lto				// [in] указатель на размер from 
-)
-{
-	if ((sendto(sS, name, strlen(name) + 1, NULL, to, *lto)) == SOCKET_ERROR)
-	{
-		cout << "[ERROR] The response was not sent to the client.\n";
-		throw  SetErrorMsgText("send:", WSAGetLastError());
-	}
-
-	cout << "[OK] The response was sent to the client: " << name << "\n";
-	return true;
+// ответ на запрос клиента, true если успешно
+bool PutAnswerToClient(char* name, struct sockaddr* to, int* lto) {
+    try
+    {
+        // сервер отправляет свой позывной
+        if ((sendto(sS, name, strlen(name) + 1, NULL, to, *lto)) == SOCKET_ERROR)   throw SetErrorMsgText("sendto:", WSAGetLastError());
+        return true;
+    }
+    catch (string errorMsgText)
+    {
+        throw SetErrorMsgText("PutAnswerToClient: ", WSAGetLastError());
+    }
+    return false;
 }
 
+// широковеещательный запрос всем узлам сети с позывным сервера
+void GetServer(char* call, short port, struct sockaddr* from, int* flen) {
+    SOCKET cC;
+    SOCKADDR_IN all;
+
+    int timeout = 5000;
 
 
+    int optval = 1;
+    char buf[50];
 
+    try {
+        if ((cC = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
+            throw  SetErrorMsgText("socket:", WSAGetLastError());
 
+        // установка режима работы сокета: для использования широковещательного адреса нужен SO_BROADCAST
+        if (setsockopt(cC, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
+            throw  SetErrorMsgText("setsocketopt:", WSAGetLastError());
+        if (setsockopt(cC, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
+            throw  SetErrorMsgText("setsocketopt:", WSAGetLastError());
 
-bool GetServer(
-	char* call,					// [in] позывной сервера  
-	short            port,		// [in] номер порта сервера    
-	struct sockaddr* from,		// [out] указатель на SOCKADDR_IN
-	int* flen					// [out] указатель на размер from 
-)
-{
-	memset(from, 0, sizeof(flen));
-	int optval = 1;
-	SOCKET cC;
-	int countOfServers = 0;
-	int timeout = 5000;
+        all.sin_family = AF_INET;
+        all.sin_port = htons(port);
+        all.sin_addr.s_addr = INADDR_BROADCAST; // широковещательный адрес
+        //server.sin_addr.s_addr = inet_addr("192.168.157.99");
 
-	try
-	{
-		if ((cC = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-			throw SetErrorMsgText("socket:", WSAGetLastError());
+        // отправка широковещательного запроса с позывным
+        if (sendto(cC, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all)) == SOCKET_ERROR)
+            throw SetErrorMsgText("sendto:", WSAGetLastError());
+        // ожидание ответа
+        if (recvfrom(cC, buf, sizeof(buf), NULL, from, flen) == SOCKET_ERROR)
+            throw  SetErrorMsgText("recvfrom:", WSAGetLastError());
 
-		if (setsockopt(cC, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
-			throw SetErrorMsgText("opt:", WSAGetLastError());
-
-		// we need this to prevent the server from going into standby mode
-		if (setsockopt(cC, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
-			throw SetErrorMsgText("opt:", WSAGetLastError());
-
-
-		SOCKADDR_IN all;                        // параметры  сокета sS
-		all.sin_family = AF_INET;               // используется IP-адресация  
-		all.sin_port = htons(port);				// порт 2000
-		all.sin_addr.s_addr = INADDR_BROADCAST; // всем 
-		char clientCall[50];
-
-
-		if ((sendto(cC, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all))) == SOCKET_ERROR)
-			throw SetErrorMsgText("sendto:", WSAGetLastError());
-		//cout << "[OK] Sent message: " << call << "\n";
-
-
-		if ((recvfrom(cC, clientCall, sizeof(clientCall), NULL, from, flen)) == SOCKET_ERROR)
-		{
-			/*if (WSAGetLastError() == WSAETIMEDOUT)
-				return false;
-			else*/
-			throw SetErrorMsgText("recv:", WSAGetLastError());
-		}
-		//cout << "[OK] Received message: " << clientCall << "\n";
-
-
-
-
-		if (!strcmp(clientCall, call))
-		{
-			++countOfServers;
-			cout << "[INFO] Found server #" << countOfServers << "\n";
-			SOCKADDR_IN* addr = (SOCKADDR_IN*)&from;
-			cout << "[INFO] Server port: " << addr->sin_port << "\n";
-			cout << "[INFO] Server IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n";
-			return true;
-		}
-		else
-			cout << "[ERROR] Did not found server with callname: " << call << "\n\n";
-
-	}
-	catch (string errorMsgText)
-	{
-		if (WSAGetLastError() == WSAETIMEDOUT)
-		{
-			cout << "Number of servers: " << countOfServers << endl;
-			if (closesocket(cC) == SOCKET_ERROR)
-				throw SetErrorMsgText("closesocket:", WSAGetLastError());
-		}
-		else
-			throw SetErrorMsgText("GetServer:", WSAGetLastError());
-	}
-
-}
-
-
-
-
-
-
-int main()
-{
-	// 0.
-	setlocale(LOCALE_ALL, "ru");
-	WSADATA wsaData;
-	SOCKADDR_IN clnt;
-	int lc = sizeof(clnt);
-	char name[] = "Hello";
-
-
-
-	// 1.
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		throw SetErrorMsgText("Startup:", WSAGetLastError());
-
-
-
-	// find servers with the same port
-	GetServer(name, 2000, (sockaddr*)&clnt, &lc);
-
-
-
-	// get request and put answer
-	while (true)
-	{
-		if (GetRequestFromClient(name, 2000, (sockaddr*)&clnt, &lc))
-			PutAnswerToClient(name, (sockaddr*)&clnt, &lc);
-		// (you can uncomment this if you want to)
-		// else PutAnswerToClient((char*)"ERROR! Enter correct callsign.", (sockaddr*)&clnt, &lc);
-
-		SOCKADDR_IN* addr = (SOCKADDR_IN*)&clnt;
-		cout << "\n[INFO] Client port: " << addr->sin_port;
-		cout << "\n[INFO] Client IP: " << inet_ntoa(addr->sin_addr) << "\n\n\n\n\n";
-
-		if (closesocket(sS) == SOCKET_ERROR)
-			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
-	}
-
-
-
-	// 5.
-	if (WSACleanup() == SOCKET_ERROR)
-		throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+        // если позывные совпадают
+        if (strcmp(call, buf) == 0) {
+            countServers++;
+            cout << "Server N" << countServers;
+            hostent* shostname = gethostbyaddr((char*)&((SOCKADDR_IN*)from)->sin_addr, sizeof(SOCKADDR_IN), AF_INET);
+            cout << "\tIP: " << inet_ntoa(((SOCKADDR_IN*)from)->sin_addr) << endl;
+            cout << "\t\tPort: " << ntohs(((struct sockaddr_in*)from)->sin_port) << endl;
+            cout << "\t\tHostname: " << shostname->h_name << endl;
+        }
+    }
+    catch (string errorMsgText)
+    {
+        if (WSAGetLastError() == WSAETIMEDOUT) {
+            cout << "Total number of servers with that callsign: " << countServers << endl;
+            if (closesocket(cC) == SOCKET_ERROR) throw SetErrorMsgText("closesocket: ", WSAGetLastError());
+        }
+        else throw SetErrorMsgText("GetServer:", WSAGetLastError());
+    }
 }

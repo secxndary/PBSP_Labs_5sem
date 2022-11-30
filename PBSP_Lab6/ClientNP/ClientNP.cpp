@@ -5,7 +5,7 @@
 #pragma comment (lib, "WS2_32.lib")
 #pragma warning(disable:4996)
 #define PIPE_NAME L"\\\\.\\pipe\\Tube"
-#define PIPE_NAME_LAN L"\\\\secxndary\\pipe\\Tube"	
+#define PIPE_NAME_LAN L"\\\\brruuuhhhh\\pipe\\Tube"	
 #define STOP "STOP"
 using namespace std;
 
@@ -32,7 +32,7 @@ int main()
 		if ((cH = CreateFile(
 			// для передачи в локальной сети: на сервере оставьте такой же локальный PIPE_NAME, 
 			// а на клиента замените на его PIPE_NAME_LAN и введите в него имя своего серверного компа
-			PIPE_NAME,								// [in] символическое имя канала 
+			PIPE_NAME_LAN,								// [in] символическое имя канала 
 			GENERIC_READ | GENERIC_WRITE,			// [in] чтение или запись в канал 
 			FILE_SHARE_READ | FILE_SHARE_WRITE,		// [in] режим совместного использования
 			NULL, OPEN_EXISTING, NULL,				// [in] атрибуты безопасности, флаги открытия канала

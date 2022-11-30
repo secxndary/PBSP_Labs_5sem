@@ -129,6 +129,9 @@
   <ItemGroup>
     <ClCompile Include="ServerB.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ErrorMessage.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

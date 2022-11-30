@@ -214,8 +214,8 @@ int main()
 	char name[] = "Hello";
 	serv.sin_family = AF_INET;
 	serv.sin_port = htons(2000);
-	serv.sin_addr.s_addr = INADDR_ANY;
-	//serv.sin_addr.s_addr = inet_addr("169.254.184.241");
+	//serv.sin_addr.s_addr = INADDR_ANY;
+	serv.sin_addr.s_addr = inet_addr("169.254.184.241");
 	memset(&clnt, 0, sizeof(clnt));
 	int optval = 1;
 

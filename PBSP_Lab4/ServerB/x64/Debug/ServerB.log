@@ -1,5 +1,5 @@
 ﻿  ServerB.cpp
-C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(106,5): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(154,6): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(196): warning C4715: GetServer: значение возвращается не при всех путях выполнения
+C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(101,12): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(138,12): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\ServerB\ServerB.cpp(94): warning C4715: GetRequestFromClient: значение возвращается не при всех путях выполнения
   ServerB.vcxproj -> C:\Users\valda\source\repos\semester#5\ПБСП\PBSP_Lab4\x64\Debug\ServerB.exe

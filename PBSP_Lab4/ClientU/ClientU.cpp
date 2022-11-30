@@ -60,7 +60,7 @@ int main()
 		serv.sin_port = htons(2000);
 		//								127.0.0.1
 		//								192.168.56.104
-		serv.sin_addr.s_addr = inet_addr("127.0.0.1");
+		serv.sin_addr.s_addr = inet_addr("26.150.99.115");
 		char obuf[50] = "Hello";
 		int  lobuf = 0;
 		int lc = sizeof(serv);
