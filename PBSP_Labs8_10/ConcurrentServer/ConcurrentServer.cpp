@@ -1,68 +1,111 @@
-п»ї#include <iostream>
-#include <clocale>
-#include "ErrorMessage.h"
-#include "Windows.h"
-#include <time.h>
-#pragma comment (lib, "WS2_32.lib")
-#pragma warning(disable:4996)
-using namespace std;
-#define PORT 2000;
+#define _CRT_SECURE_NO_WARNINGS
+
+#include "Global.h"
+#include "AcceptServer.h"
+#include "DispathServer.h"
+#include "GarbageCleaner.h"
+#include "ConsolePipe.h"
+#include "ResponseServer.h"
+#include "tchar.h"
 
 
+int _tmain(int argc, _TCHAR* argv[]) {
+	setlocale(LC_ALL, "Russian");
 
-HANDLE hAcceptServer,    // РґРµСЃРєСЂРёРїС‚РѕСЂ РїРѕС‚РѕРєР° AcceptServer
-hConsolePipe,			 // РґРµСЃРєСЂРёРїС‚РѕСЂ РїРѕС‚РѕРєР° ConsolePipe 
-hGarbageCleaner;		 // РґРµСЃРєСЂРёРїС‚РѕСЂ РїРѕС‚РѕРєР° GarbageCleaner
-DWORD WINAPI AcceptServer(LPVOID pPrm);  // РїСЂРѕС‚РѕС‚РёРїС‹ С„СѓРЅРєС†РёР№ 
-DWORD WINAPI ConsolePipe(LPVOID pPrm);
-DWORD WINAPI GarbageCleaner(LPVOID pPrm);
+	try {
+
+		if (argc > 1) {
+			int tmp = atoi(argv[1]);
+			if (tmp >= 0 && tmp <= 65535) {
+				port = atoi(argv[1]);
+				cout << "Задан TCP-порт: " << port << endl;
+			}
+			else {
+				cout << "Задан неверный TCP-порт" << endl;
+			}
+		}
+		else {
+			cout << "Используется TCP порт по умолчанию: " << port << endl;
+		}
+
+		if (argc > 2) {
+			int tmp = atoi(argv[2]);
+			if (tmp >= 0 && tmp <= 65535) {
+				uport = atoi(argv[2]);
+				cout << "Задан UDP-порт: " << uport << endl;
+			}
+			else {
+				cout << "Задан неверный UDP-порт" << endl;
+			}
+		}
+		else {
+			cout << "Используется UDP порт по умолчанию: " << uport << endl;
+		}
+
+		if (argc > 3) { //3 параметр - имя библиотеки
+			dllname = argv[3];
+		}
+
+		if (argc > 4) {
+			npname = argv[4];
+			cout << "Задано имя именованного канала: " << npname << endl;
+		}
+		else cout << "Используется имя именованного канала по умолчанию: " << npname << endl;
+
+		if (argc > 5) {
+			ucall = argv[5];
+			cout << "Задан позывной:   " << ucall << endl;
+		}
+			cout << "Используется позывной по умолчанию: " << ucall << endl;
+		srand((unsigned)time(NULL));
+
+		volatile TalkersCommand  cmd = START;
+
+		InitializeCriticalSection(&scListContact);
 
 
-
-int _tmain(int argc, TCHAR* argv[])
-{
-
-    return 0;
-}
+		st1 = LoadLibrary(dllname);
+		sss = (HANDLE(*)(char*, LPVOID))GetProcAddress(st1, "SSS");
+		if (st1 == NULL) cout << "Ошибка при загрузке DLL" << endl;
+		else cout << "Загружена DLL " << dllname << endl << endl;
 
 
+		hAcceptServer = CreateThread(NULL, NULL, AcceptServer, (LPVOID)&cmd, NULL, NULL);            //main
+		HANDLE hDispathServer = CreateThread(NULL, NULL, DispathServer, (LPVOID)&cmd, NULL, NULL);
+
+		HANDLE hConsolePipe = CreateThread(NULL, NULL, ConsolePipe, (LPVOID)&cmd, NULL, NULL);       //main - Сервер именованного канала
+		HANDLE hGarbageCleaner = CreateThread(NULL, NULL, GarbageCleaner, (LPVOID)&cmd, NULL, NULL); //main
 
 
-DWORD WINAPI AcceptServer(LPVOID pPrm)
-{
-    DWORD rc = 0;    // РєРѕРґ РІРѕР·РІСЂР°С‚Р° 
-    SleepEx(1000, TRUE);
-    SOCKET  ServerSocket;
-    WSADATA wsaData;
+		HANDLE hResponseServer = CreateThread(NULL, NULL, ResponseServer, (LPVOID)&cmd, NULL, NULL);
+			
+		SetThreadPriority(hAcceptServer, THREAD_PRIORITY_HIGHEST);			//более активным станет подключение клиентов
+		SetThreadPriority(hGarbageCleaner, THREAD_PRIORITY_BELOW_NORMAL);	//пониженный (в фоновом режиме)
+		SetThreadPriority(hConsolePipe, THREAD_PRIORITY_NORMAL);
 
+		SetThreadPriority(hResponseServer, THREAD_PRIORITY_ABOVE_NORMAL);
+		SetThreadPriority(hDispathServer, THREAD_PRIORITY_NORMAL);
 
-    try {
-        if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-            throw SetErrorMsgText("Startup:", WSAGetLastError());
-        if ((ServerSocket = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-            throw SetErrorMsgText("Socket:", WSAGetLastError());
+		WaitForSingleObject(hAcceptServer, INFINITE);
+		WaitForSingleObject(hDispathServer, INFINITE);
+		WaitForSingleObject(hConsolePipe, INFINITE);
+		WaitForSingleObject(hGarbageCleaner, INFINITE);
+		WaitForSingleObject(hResponseServer, INFINITE);
 
-        SOCKADDR_IN Server_IN;
-        Server_IN.sin_family = AF_INET;
-        Server_IN.sin_port = htons(2000);
-        Server_IN.sin_addr.s_addr = ADDR_ANY;
-        /*Server_IN.sin_addr.s_addr = inet_addr("127.0.0.1");*/
+		CloseHandle(hAcceptServer);
+		CloseHandle(hDispathServer);
+		CloseHandle(hGarbageCleaner);
+		CloseHandle(hConsolePipe);
+		CloseHandle(hResponseServer);
 
-        if (bind(ServerSocket, (LPSOCKADDR)&Server_IN, sizeof(Server_IN)) == SOCKET_ERROR)
-            throw SetErrorMsgText("Bind:", WSAGetLastError());
-        if (listen(ServerSocket, SOMAXCONN) == SOCKET_ERROR)
-            throw SetErrorMsgText("Listen:", WSAGetLastError());
+		DeleteCriticalSection(&scListContact);
 
-        cout << "qwe";
-        if (closesocket(ServerSocket) == SOCKET_ERROR)
-            throw SetErrorMsgText("Closesocket:", WSAGetLastError());
-        if (WSACleanup() == SOCKET_ERROR)
-            throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+		FreeLibrary(st1);
+	}
+	catch (...) {
+		cout << "error" << endl;
+	}
 
-
-        ExitThread(rc);  // Р·Р°РІРµСЂС€РµРЅРёРµ СЂР°Р±РѕС‚С‹ РїРѕС‚РѕРєР°
-    }
-    catch(string e) {
-        cout << e;
-    }
+	system("pause");
+	return 0;
 }

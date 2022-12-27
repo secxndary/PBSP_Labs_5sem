@@ -37,7 +37,7 @@ string SetErrorMsgText(string msgText, int code)
 
 int main()
 {
-	//setlocale(LC_ALL, "Russian");
+	setlocale(LC_ALL, "Russian");
 
 	SOCKET  sS;           // дескриптор сокета 
 	WSADATA wsaData;
@@ -62,15 +62,15 @@ int main()
 
 
 
-		//SOCKET cS;	                 // сокет для обмена данными с клиентом 
-		//SOCKADDR_IN clnt;             // параметры  сокета клиента
-		//memset(&clnt, 0, sizeof(clnt)); // обнулить память
-		//int lclnt = sizeof(clnt);    // размер SOCKADDR_IN
-		//
+		SOCKET cS;	                 // сокет для обмена данными с клиентом 
+		SOCKADDR_IN clnt;             // параметры  сокета клиента
+		memset(&clnt, 0, sizeof(clnt)); // обнулить память
+		int lclnt = sizeof(clnt);    // размер SOCKADDR_IN
+		
 
-		//char* ip = inet_ntoa(clnt.sin_addr);	// ф-ия для получения айпи адреса клиента
-		//cout << "Client IP:     " << ip << endl;
-		//cout << "Client port:   " << clnt.sin_port << endl;
+		char* ip = inet_ntoa(clnt.sin_addr);	// ф-ия для получения айпи адреса клиента
+		cout << "Client IP:     " << ip << endl;
+		cout << "Client port:   " << clnt.sin_port << endl;
 
 
 
@@ -86,22 +86,22 @@ int main()
 		// =======================  TASK 11  =======================
 
 
-		//char ibuf[19] = "Hello from client\n";
-		//int  libuf = 19;
+	/*	char ibuf[19] = "Hello from client\n";
+		int  libuf = 19;
 
-		//for (int i = 1; i <= 1000; i++)
-		//{
-		//	if ((libuf = recv(cS, ibuf, sizeof(ibuf) - 1, NULL)) == SOCKET_ERROR)
-		//		throw  SetErrorMsgText("recv:", WSAGetLastError());
+		for (int i = 1; i <= 1000; i++)
+		{
+			if ((libuf = recv(cS, ibuf, sizeof(ibuf) - 1, NULL)) == SOCKET_ERROR)
+				throw  SetErrorMsgText("recv:", WSAGetLastError());
 
-		//	const int outLen = 19;
-		//	char charOut[outLen + 1];
-		//	int numBytes = recv(cS, charOut, outLen, 0);
-		//	if (numBytes > 0) {
-		//		charOut[numBytes] = '\0';
-		//		cout << charOut;
-		//	}
-		//}
+			const int outLen = 19;
+			char charOut[outLen + 1];
+			int numBytes = recv(cS, charOut, outLen, 0);
+			if (numBytes > 0) {
+				charOut[numBytes] = '\0';
+				cout << charOut;
+			}
+		}*/
 
 
 
@@ -171,67 +171,67 @@ int main()
 		// =======================  TASK 15  =======================
 		// to run this comment lines 48-73 
 
-		int i = 0;
-		WSADATA ws;
-		SOCKET s;
-		SOCKET c;
-		char ibuf[50];
-		char obuf[50] = "Hello from Client";
-		int t;
+		//int i = 0;
+		//WSADATA ws;
+		//SOCKET s;
+		//SOCKET c;
+		//char ibuf[50];
+		//char obuf[50] = "Hello from Client";
+		//int t;
 
-		if (FAILED(WSAStartup(MAKEWORD(1, 1), &ws)))
-			cout << "socket:" << WSAGetLastError() << endl;
-		if (INVALID_SOCKET == (s = socket(AF_INET, SOCK_STREAM, 0)))
-			cout << "socket:" << WSAGetLastError() << endl;
+		//if (FAILED(WSAStartup(MAKEWORD(1, 1), &ws)))
+		//	cout << "socket:" << WSAGetLastError() << endl;
+		//if (INVALID_SOCKET == (s = socket(AF_INET, SOCK_STREAM, 0)))
+		//	cout << "socket:" << WSAGetLastError() << endl;
+		//gets_s(ibuf, 50);
+		//sockaddr_in c_adr;
+		//sockaddr_in s_adr;
+		//{
+		//	s_adr.sin_port = htons(4000);
+		//	s_adr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+		//	s_adr.sin_family = AF_INET;
+		//}
 
-		sockaddr_in c_adr;
-		sockaddr_in s_adr;
-		{
-			s_adr.sin_port = htons(2000);
-			s_adr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-			s_adr.sin_family = AF_INET;
-		}
+		//if (SOCKET_ERROR == (bind(s, (LPSOCKADDR)&s_adr, sizeof(s_adr))))
+		//	cout << "bind:" << WSAGetLastError() << endl;
 
-		if (SOCKET_ERROR == (bind(s, (LPSOCKADDR)&s_adr, sizeof(s_adr))))
-			cout << "bind:" << WSAGetLastError() << endl;
-
-		if (SOCKET_ERROR == listen(s, 2))
-			cout << "listen:" << WSAGetLastError << endl;
+		//if (SOCKET_ERROR == listen(s, 2))
+		//	cout << "listen:" << WSAGetLastError << endl;
 
 
-		while (true)
-		{
-			int lcInt = sizeof(c_adr);
-			if (INVALID_SOCKET == (c = accept(s, (sockaddr*)&c_adr, &lcInt)))
-				cout << "accept:" << WSAGetLastError() << endl;
+		//while (true)
+		//{
+		//	int lcInt = sizeof(c_adr);
+		//	if (INVALID_SOCKET == (c = accept(s, (sockaddr*)&c_adr, &lcInt)))
+		//		cout << "accept:" << WSAGetLastError() << endl;
 
-			cout << "Client connected." << endl;
-			cout << "Client IP:    " << inet_ntoa(c_adr.sin_addr) << endl;
-			cout << "Client port:  " << htons(c_adr.sin_port) << "\n\n";
+		//	cout << "Client connected." << endl;
+		//	cout << "Client IP:    " << inet_ntoa(c_adr.sin_addr) << endl;
+		//	cout << "Client port:  " << htons(c_adr.sin_port) << "\n\n";
 
-			int time = clock();
-			while (true)
-			{
-				if (SOCKET_ERROR == recv(c, ibuf, sizeof(ibuf), NULL))
-					break;
+		//	int time = clock();
+		//	while (true)
+		//	{
+		//		if (SOCKET_ERROR == recv(c, ibuf, sizeof(ibuf), NULL))
+		//			break;
 
-				cout << ibuf << " " << i << "\n";
-				i++;
+		//		cout << ibuf << " " << i << "\n";
+		//		i++;
 
-				if (!strcmp(ibuf, "CLOSE")) { break; }
+		//		if (!strcmp(ibuf, "CLOSE")) { break; }
 
-				if (SOCKET_ERROR == send(c, obuf, strlen(obuf) + 1, NULL))
-					break;
-			}
-			i = 0;
-			cout << "Client Disconected.\n";
-			cout << "Program was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n\n";
-		}
-		if (closesocket(c) == SOCKET_ERROR)
-			throw SetErrorMsgText("closesocket:", WSAGetLastError());
+		//		if (SOCKET_ERROR == send(c, obuf, strlen(obuf) + 1, NULL))
+		//			break;
+		//	}
+		//	i = 0;
+		//	cout << "Client Disconected.\n";
+		//	cout << "Program was running for " << time << " ticks or " << ((float)time) / CLOCKS_PER_SEC << " seconds.\n\n";
+		//}
+		//if (closesocket(c) == SOCKET_ERROR)
+		//	throw SetErrorMsgText("closesocket:", WSAGetLastError());
 
-		if (WSACleanup() == SOCKET_ERROR)
-			throw SetErrorMsgText("Cleanup:", WSAGetLastError());
+		//if (WSACleanup() == SOCKET_ERROR)
+		//	throw SetErrorMsgText("Cleanup:", WSAGetLastError());
 
 
 
